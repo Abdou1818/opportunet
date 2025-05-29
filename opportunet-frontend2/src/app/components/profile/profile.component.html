@@ -1,0 +1,358 @@
+<!-- src/app/components/profile/profile.component.html -->
+<div class="profile-page">
+  <div class="page-container">
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Chargement du profil...</p>
+    </div>
+
+    <!-- Page Header -->
+    <div *ngIf="!loading" class="page-header">
+      <h1 class="page-title">Mon Profil</h1>
+      <p class="page-subtitle">Gérez vos informations personnelles et professionnelles</p>
+    </div>
+
+    <!-- Messages -->
+    <div *ngIf="message" class="alert" [ngClass]="messageType === 'success' ? 'alert-success' : 'alert-error'">
+      {{ message }}
+    </div>
+
+    <div *ngIf="!loading" class="profile-content">
+      <!-- Informations personnelles -->
+      <div class="profile-section">
+        <div class="section-header">
+          <h2 class="section-title">Informations personnelles</h2>
+        </div>
+        
+        <div class="card">
+          <div class="card-body">
+            <form [formGroup]="profileForm" (ngSubmit)="onSubmitProfile()">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Prénom *</label>
+                  <input 
+                    type="text" 
+                    formControlName="firstName" 
+                    class="form-input"
+                    [class.error]="profileFormControls['firstName'].invalid && profileFormControls['firstName'].touched"
+                  />
+                  <div *ngIf="profileFormControls['firstName'].invalid && profileFormControls['firstName'].touched" class="error-message">
+                    <span *ngIf="profileFormControls['firstName'].errors?.['required']">Le prénom est requis</span>
+                    <span *ngIf="profileFormControls['firstName'].errors?.['minlength']">Le prénom doit contenir au moins 2 caractères</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Nom *</label>
+                  <input 
+                    type="text" 
+                    formControlName="lastName" 
+                    class="form-input"
+                    [class.error]="profileFormControls['lastName'].invalid && profileFormControls['lastName'].touched"
+                  />
+                  <div *ngIf="profileFormControls['lastName'].invalid && profileFormControls['lastName'].touched" class="error-message">
+                    <span *ngIf="profileFormControls['lastName'].errors?.['required']">Le nom est requis</span>
+                    <span *ngIf="profileFormControls['lastName'].errors?.['minlength']">Le nom doit contenir au moins 2 caractères</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Email *</label>
+                  <input 
+                    type="email" 
+                    formControlName="email" 
+                    class="form-input"
+                    [class.error]="profileFormControls['email'].invalid && profileFormControls['email'].touched"
+                  />
+                  <div *ngIf="profileFormControls['email'].invalid && profileFormControls['email'].touched" class="error-message">
+                    <span *ngIf="profileFormControls['email'].errors?.['required']">L'email est requis</span>
+                    <span *ngIf="profileFormControls['email'].errors?.['email']">Email invalide</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Téléphone</label>
+                  <input 
+                    type="tel" 
+                    formControlName="phone" 
+                    class="form-input"
+                    placeholder="+33 1 23 45 67 89"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Localisation</label>
+                  <input 
+                    type="text" 
+                    formControlName="location" 
+                    class="form-input"
+                    placeholder="Paris, France"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Années d'expérience</label>
+                  <input 
+                    type="number" 
+                    formControlName="experience" 
+                    class="form-input"
+                    min="0"
+                    max="50"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Résumé professionnel</label>
+                <textarea 
+                  formControlName="profileSummary" 
+                  class="form-textarea"
+                  rows="4"
+                  placeholder="Décrivez votre parcours, vos objectifs professionnels..."
+                ></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button 
+                  type="submit" 
+                  class="btn btn-primary"
+                  [disabled]="profileForm.invalid || saving"
+                >
+                  <span *ngIf="saving" class="loading-spinner"></span>
+                  {{ saving ? 'Enregistrement...' : 'Enregistrer les modifications' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compétences -->
+      <div class="profile-section">
+        <div class="section-header">
+          <h2 class="section-title">Compétences</h2>
+          <button 
+            class="btn btn-outline btn-sm"
+            (click)="toggleSkillForm()"
+          >
+            {{ showSkillForm ? 'Annuler' : '+ Ajouter une compétence' }}
+          </button>
+        </div>
+
+        <!-- Formulaire d'ajout de compétence -->
+        <div *ngIf="showSkillForm" class="card mb-3">
+          <div class="card-body">
+            <form [formGroup]="skillForm" (ngSubmit)="onSubmitSkill()">
+              <div class="form-group">
+                <label class="form-label">Sélectionner une compétence</label>
+                <select formControlName="skillId" class="form-select">
+                  <option value="">Choisir une compétence...</option>
+                  <option *ngFor="let skill of getAvailableSkills()" [value]="skill.id">
+                    {{ skill.name }} ({{ skill.category }})
+                  </option>
+                </select>
+              </div>
+              
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-sm" [disabled]="skillForm.invalid">
+                  Ajouter
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" (click)="toggleSkillForm()">
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Liste des compétences -->
+        <div class="card">
+          <div class="card-body">
+            <div *ngIf="skills.length === 0" class="empty-state">
+              <div class="empty-icon">🎯</div>
+              <p class="empty-text">Aucune compétence ajoutée</p>
+              <button class="btn btn-primary btn-sm" (click)="toggleSkillForm()">
+                Ajouter votre première compétence
+              </button>
+            </div>
+
+            <div *ngIf="skills.length > 0" class="skills-grid">
+              <div *ngFor="let skill of skills" class="skill-item">
+                <div class="skill-info">
+                  <h4 class="skill-name">{{ skill.name }}</h4>
+                  <p class="skill-category">{{ skill.category }}</p>
+                  <p *ngIf="skill.description" class="skill-description">{{ skill.description }}</p>
+                </div>
+                <button 
+                  class="skill-remove"
+                  (click)="removeSkill(skill.id)"
+                  title="Supprimer cette compétence"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expériences professionnelles -->
+      <div class="profile-section">
+        <div class="section-header">
+          <h2 class="section-title">Expériences professionnelles</h2>
+          <button 
+            class="btn btn-outline btn-sm"
+            (click)="toggleExperienceForm()"
+          >
+            {{ showExperienceForm ? 'Annuler' : '+ Ajouter une expérience' }}
+          </button>
+        </div>
+
+        <!-- Formulaire d'ajout/modification d'expérience -->
+        <div *ngIf="showExperienceForm" class="card mb-3">
+          <div class="card-header">
+            <h3 class="card-title">
+              {{ editingExperience ? 'Modifier l\'expérience' : 'Ajouter une expérience' }}
+            </h3>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="experienceForm" (ngSubmit)="onSubmitExperience()">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Poste occupé *</label>
+                  <input 
+                    type="text" 
+                    formControlName="jobTitle" 
+                    class="form-input"
+                    placeholder="Développeur Full Stack"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Entreprise *</label>
+                  <input 
+                    type="text" 
+                    formControlName="companyName" 
+                    class="form-input"
+                    placeholder="Nom de l'entreprise"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Date de début *</label>
+                  <input 
+                    type="date" 
+                    formControlName="startDate" 
+                    class="form-input"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Date de fin</label>
+                  <input 
+                    type="date" 
+                    formControlName="endDate" 
+                    class="form-input"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Localisation</label>
+                  <input 
+                    type="text" 
+                    formControlName="location" 
+                    class="form-input"
+                    placeholder="Paris, France"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <div class="form-checkbox">
+                    <input 
+                      type="checkbox" 
+                      formControlName="currentJob" 
+                      id="currentJob"
+                      (change)="onCurrentJobChange()"
+                    />
+                    <label for="currentJob">Poste actuel</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea 
+                  formControlName="description" 
+                  class="form-textarea"
+                  rows="4"
+                  placeholder="Décrivez vos missions, réalisations, technologies utilisées..."
+                ></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="experienceForm.invalid">
+                  {{ editingExperience ? 'Modifier' : 'Ajouter' }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="toggleExperienceForm()">
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Liste des expériences -->
+        <div class="card">
+          <div class="card-body">
+            <div *ngIf="workExperiences.length === 0" class="empty-state">
+              <div class="empty-icon">💼</div>
+              <p class="empty-text">Aucune expérience professionnelle ajoutée</p>
+              <button class="btn btn-primary btn-sm" (click)="toggleExperienceForm()">
+                Ajouter votre première expérience
+              </button>
+            </div>
+
+            <div *ngIf="workExperiences.length > 0" class="experiences-list">
+              <div *ngFor="let experience of workExperiences" class="experience-item">
+                <div class="experience-header">
+                  <div class="experience-info">
+                    <h4 class="experience-title">{{ experience.jobTitle }}</h4>
+                    <h5 class="experience-company">{{ experience.companyName }}</h5>
+                    <div class="experience-meta">
+                      <span class="experience-date">
+                        {{ formatDate(experience.startDate) }} - 
+                        {{ experience.currentJob ? 'Présent' : formatDate(experience.endDate!) }}
+                      </span>
+                      <span *ngIf="experience.location" class="experience-location">
+                        📍 {{ experience.location }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="experience-actions">
+                    <button 
+                      class="btn btn-outline btn-sm"
+                      (click)="editExperience(experience)"
+                    >
+                      ✏️ Modifier
+                    </button>
+                    <button 
+                      class="btn btn-danger btn-sm"
+                      (click)="deleteExperience(experience.id)"
+                    >
+                      🗑️ Supprimer
+                    </button>
+                  </div>
+                </div>
+                
+                <div *ngIf="experience.description" class="experience-description">
+                  <p>{{ experience.description }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

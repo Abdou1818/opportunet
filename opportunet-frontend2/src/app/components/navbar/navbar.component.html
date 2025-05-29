@@ -1,0 +1,103 @@
+<!-- src/app/components/navbar/navbar.component.html -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo -->
+    <div class="navbar-brand" (click)="navigateTo('/')">
+      <span class="navbar-title">OpportuneT</span>
+    </div>
+
+    <!-- Navigation Desktop -->
+    <div class="navbar-nav" *ngIf="isAuthenticated">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+        🏠 Tableau de bord
+      </a>
+      <a routerLink="/jobs" routerLinkActive="active" class="nav-link">
+        💼 Emplois
+      </a>
+      <a routerLink="/applications" routerLinkActive="active" class="nav-link">
+        📋 Mes candidatures
+      </a>
+      <a routerLink="/profile" routerLinkActive="active" class="nav-link">
+        👤 Profil
+      </a>
+    </div>
+
+    <!-- Actions utilisateur -->
+    <div class="navbar-actions">
+      <div *ngIf="!isAuthenticated" class="auth-actions">
+        <button (click)="navigateTo('/login')" class="btn btn-outline">
+          Connexion
+        </button>
+        <button (click)="navigateTo('/register')" class="btn btn-primary">
+          S'inscrire
+        </button>
+      </div>
+
+      <div *ngIf="isAuthenticated" class="user-menu">
+        <!-- Avatar utilisateur -->
+        <div class="user-avatar" (click)="toggleMenu()">
+          <div class="avatar-circle">
+            {{ userInitials }}
+          </div>
+          <span class="user-name">{{ currentUser?.firstName }}</span>
+          <span class="chevron" [class.rotated]="isMenuOpen">▼</span>
+        </div>
+
+        <!-- Menu déroulant -->
+        <div class="dropdown-menu" [class.open]="isMenuOpen">
+          <div class="user-info">
+            <div class="user-details">
+              <p class="user-full-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</p>
+              <p class="user-email">{{ currentUser?.email }}</p>
+            </div>
+          </div>
+          
+          <div class="menu-divider"></div>
+          
+          <a routerLink="/profile" class="dropdown-item" (click)="closeMenu()">
+            👤 Mon profil
+          </a>
+          <a routerLink="/settings" class="dropdown-item" (click)="closeMenu()">
+            ⚙️ Paramètres
+          </a>
+          
+          <div class="menu-divider"></div>
+          
+          <button class="dropdown-item logout" (click)="logout()">
+            🚪 Déconnexion
+          </button>
+        </div>
+      </div>
+
+      <!-- Menu mobile -->
+      <button class="mobile-menu-btn" (click)="toggleMenu()" *ngIf="isAuthenticated">
+        <span class="hamburger-line" [class.active]="isMenuOpen"></span>
+        <span class="hamburger-line" [class.active]="isMenuOpen"></span>
+        <span class="hamburger-line" [class.active]="isMenuOpen"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation mobile -->
+  <div class="mobile-nav" [class.open]="isMenuOpen" *ngIf="isAuthenticated">
+    <a routerLink="/dashboard" routerLinkActive="active" class="mobile-nav-link" (click)="closeMenu()">
+      🏠 Tableau de bord
+    </a>
+    <a routerLink="/jobs" routerLinkActive="active" class="mobile-nav-link" (click)="closeMenu()">
+      💼 Emplois
+    </a>
+    <a routerLink="/applications" routerLinkActive="active" class="mobile-nav-link" (click)="closeMenu()">
+      📋 Mes candidatures
+    </a>
+    <a routerLink="/profile" routerLinkActive="active" class="mobile-nav-link" (click)="closeMenu()">
+      👤 Profil
+    </a>
+    <div class="mobile-nav-divider"></div>
+    <button class="mobile-nav-link logout" (click)="logout()">
+      🚪 Déconnexion
+    </button>
+  </div>
+</nav>
+
+<!-- Overlay pour fermer les menus -->
+<div class="overlay" [class.visible]="isMenuOpen" (click)="closeMenu()"></div>

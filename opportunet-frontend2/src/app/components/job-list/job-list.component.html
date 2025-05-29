@@ -1,0 +1,177 @@
+<!-- src/app/components/job-list/job-list.component.html -->
+<div class="job-list-page">
+  <div class="page-container">
+    <!-- En-tête -->
+    <div class="page-header">
+      <h1 class="page-title">Recherche d'emplois</h1>
+      <p class="page-subtitle">Trouvez votre opportunité idéale parmi {{ jobs.length }} offres disponibles</p>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="search-section">
+    <form [formGroup]="searchForm" class="search-form">
+      <div class="search-input-group">
+        <input
+        type="text"
+        formControlName="keyword"
+        placeholder="Rechercher par poste, entreprise, mot-clé..."
+        class="search-input"
+        />
+        <button type="button" class="search-btn">
+        🔍
+        </button>
+      </div>
+      
+      <button 
+        type="button" 
+        class="filters-toggle"
+        (click)="toggleFilters()"
+        [class.active]="showFilters"
+      >
+        🔧 Filtres
+        <span class="filters-count" *ngIf="hasActiveFilters">{{ resultsCount }}</span>
+      </button>
+    </form>
+
+      <!-- Filtres avancés -->
+      <div class="filters-panel" [class.open]="showFilters">
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label">Type d'emploi</label>
+            <select formControlName="jobType" class="filter-select">
+              <option value="">Tous les types</option>
+              <option *ngFor="let type of jobTypes" [value]="type">
+                {{ getJobTypeLabel(type) }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Niveau d'expérience</label>
+            <select formControlName="experienceLevel" class="filter-select">
+              <option value="">Tous les niveaux</option>
+              <option *ngFor="let level of experienceLevels" [value]="level">
+                {{ getExperienceLevelLabel(level) }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Localisation</label>
+            <input
+              type="text"
+              formControlName="location"
+              placeholder="Ville, région..."
+              class="filter-input"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Entreprise</label>
+            <select formControlName="company" class="filter-select">
+              <option value="">Toutes les entreprises</option>
+              <option *ngFor="let company of companies" [value]="company.id">
+                {{ company.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filters-actions">
+          <button 
+            type="button" 
+            class="btn btn-outline btn-sm"
+            (click)="clearFilters()"
+            *ngIf="hasActiveFilters"
+          >
+            Effacer les filtres
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résultats -->
+    <div class="results-section">
+      <div class="results-header">
+        <h2 class="results-count">
+          {{ resultsCount }} emploi{{ resultsCount !== 1 ? 's' : '' }} trouvé{{ resultsCount !== 1 ? 's' : '' }}
+        </h2>
+        <p class="results-subtitle" *ngIf="hasActiveFilters">
+          Résultats filtrés sur {{ jobs.length }} offres au total
+        </p>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Chargement des emplois...</p>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!loading && filteredJobs.length === 0" class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3 class="empty-title">Aucun emploi trouvé</h3>
+        <p class="empty-text">
+          <span *ngIf="hasActiveFilters">
+            Essayez de modifier vos critères de recherche ou
+            <button class="link-btn" (click)="clearFilters()">effacez les filtres</button>
+          </span>
+          <span *ngIf="!hasActiveFilters">
+            Aucune offre d'emploi n'est disponible pour le moment.
+          </span>
+        </p>
+      </div>
+
+      <!-- Liste des emplois -->
+      <div *ngIf="!loading && filteredJobs.length > 0" class="jobs-grid">
+        <div 
+          *ngFor="let job of filteredJobs" 
+          class="job-card"
+          [routerLink]="['/jobs', job.id]"
+        >
+          <div class="job-header">
+            <div class="job-company-logo">
+              {{ job.company.name.charAt(0).toUpperCase() }}
+            </div>
+            <div class="job-info">
+              <h3 class="job-title">{{ job.title }}</h3>
+              <p class="job-company">{{ job.company.name }}</p>
+            </div>
+            <div class="job-posted">
+              <span class="job-date" *ngIf="job.createdAt">
+                {{ formatDate(job.createdAt) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="job-description">
+            <p>{{ job.description | slice:0:150 }}{{ job.description.length > 150 ? '...' : '' }}</p>
+          </div>
+
+          <div class="job-details">
+            <div class="job-tags">
+              <span class="tag tag-type">{{ getJobTypeLabel(job.jobType) }}</span>
+              <span class="tag tag-level">{{ getExperienceLevelLabel(job.experienceLevel) }}</span>
+              <span class="tag tag-location" *ngIf="job.location">
+                📍 {{ job.location }}
+              </span>
+            </div>
+            
+            <div class="job-salary" *ngIf="job.salary || job.salaryMin">
+              <span class="salary-amount">{{ formatSalary(job) }}</span>
+            </div>
+          </div>
+
+          <div class="job-actions">
+            <button class="btn btn-outline btn-sm">
+              Voir détails
+            </button>
+            <button class="btn btn-primary btn-sm">
+              Postuler
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

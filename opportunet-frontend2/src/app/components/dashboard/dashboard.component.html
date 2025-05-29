@@ -1,0 +1,159 @@
+<!-- src/app/components/dashboard/dashboard.component.html -->
+<div class="dashboard">
+  <div class="dashboard-container">
+    <!-- En-tête de bienvenue -->
+    <div class="welcome-section">
+      <h1 class="welcome-title">
+        {{ welcomeMessage }}, {{ currentUser?.firstName }}! 👋
+      </h1>
+      <p class="welcome-subtitle">
+        Voici un aperçu de votre activité sur OpportuneT
+      </p>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon total">📊</div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ stats.totalApplications }}</h3>
+          <p class="stat-label">Candidatures totales</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon pending">⏳</div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ stats.pendingApplications }}</h3>
+          <p class="stat-label">En attente</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon accepted">✅</div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ stats.acceptedApplications }}</h3>
+          <p class="stat-label">Acceptées</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon rejected">❌</div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ stats.rejectedApplications }}</h3>
+          <p class="stat-label">Refusées</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="dashboard-grid">
+      <!-- Candidatures récentes -->
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h2 class="card-title">Mes candidatures récentes</h2>
+          <a routerLink="/applications" class="card-link">Voir tout</a>
+        </div>
+        
+        <div class="card-content">
+          <div *ngIf="recentApplications.length === 0" class="empty-state">
+            <div class="empty-icon">📋</div>
+            <p class="empty-text">Aucune candidature pour le moment</p>
+            <a routerLink="/jobs" class="btn btn-primary">Découvrir des emplois</a>
+          </div>
+
+          <div *ngIf="recentApplications.length > 0" class="applications-list">
+            <div 
+              *ngFor="let application of recentApplications" 
+              class="application-item"
+            >
+              <div class="application-info">
+                <h4 class="job-title">{{ application.job.title }}</h4>
+                <p class="company-name">{{ application.job.company.name }}</p>
+                <span class="application-date">
+                  {{ formatDate(application.applicationDate) }}
+                </span>
+              </div>
+              <div class="application-status">
+                <span 
+                  class="status-badge" 
+                  [ngClass]="getStatusClass(application.status)"
+                >
+                  {{ getStatusText(application.status) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emplois recommandés -->
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h2 class="card-title">Emplois recommandés</h2>
+          <a routerLink="/jobs" class="card-link">Voir tout</a>
+        </div>
+        
+        <div class="card-content">
+          <div *ngIf="loading" class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Chargement des emplois...</p>
+          </div>
+
+          <div *ngIf="!loading && recentJobs.length === 0" class="empty-state">
+            <div class="empty-icon">💼</div>
+            <p class="empty-text">Aucun emploi disponible</p>
+          </div>
+
+          <div *ngIf="!loading && recentJobs.length > 0" class="jobs-list">
+            <div 
+              *ngFor="let job of recentJobs" 
+              class="job-item"
+              [routerLink]="['/jobs', job.id]"
+            >
+              <div class="job-info">
+                <h4 class="job-title">{{ job.title }}</h4>
+                <p class="company-name">{{ job.company.name }}</p>
+                <div class="job-details">
+                  <span class="job-type">{{ job.jobType }}</span>
+                  <span class="job-location" *ngIf="job.location">
+                    📍 {{ job.location }}
+                  </span>
+                </div>
+              </div>
+              <div class="job-actions">
+                <button class="btn btn-outline btn-sm">
+                  Voir détails
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="quick-actions">
+      <h2 class="section-title">Actions rapides</h2>
+      <div class="actions-grid">
+        <a routerLink="/jobs" class="action-card">
+          <div class="action-icon">🔍</div>
+          <h3 class="action-title">Rechercher des emplois</h3>
+          <p class="action-description">Découvrez les dernières opportunités</p>
+        </a>
+
+        <a routerLink="/profile" class="action-card">
+          <div class="action-icon">👤</div>
+          <h3 class="action-title">Mettre à jour mon profil</h3>
+          <p class="action-description">Optimisez vos chances d'être recruté</p>
+        </a>
+
+        <a routerLink="/applications" class="action-card">
+          <div class="action-icon">📋</div>
+          <h3 class="action-title">Suivre mes candidatures</h3>
+          <p class="action-description">Gérez vos candidatures en cours</p>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
