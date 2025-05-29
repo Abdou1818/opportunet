@@ -35,7 +35,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/error").permitAll()
                         //.anyRequest().authenticated())
-                        .anyRequest().permitAll();
+                        .anyRequest().permitAll())
                 .formLogin(login -> login.disable()) // Désactive le formulaire de connexion
                 .httpBasic(basic -> basic.disable()); // Désactive HTTP Basic Auth
 
